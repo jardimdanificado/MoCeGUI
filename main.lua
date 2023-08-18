@@ -12,11 +12,14 @@ end
 
 local window = 
 {
-	current = 1,
-	{
-		color={0.3,0.3,0.4,1},
-		position={10,10},
-		size={300,110},
+	current = 0
+}
+
+local function newWindow(position,size,color)
+	local win = {
+		color= color or {0.3,0.3,0.4,1},
+		position= position or {50,50},
+		size=size or {300,110},
 		button = 
 		{
 			{
@@ -29,9 +32,23 @@ local window =
 			}
 		},
 		hide = false,
-	} 
-}
-window[1].button[1].args[1] = window
+	}
+	win.button[1].args[1] = window
+	win.button.new = function(position,size,func,args,color,pcolor)
+		local btn = {
+			position = position or {300-12,0},
+			size = size or {12,12},
+			color = color or {1,0.5,0.5,1},
+			pcolor = pcolor or {0.5,0.1,0.1,1},
+			func = func or closeWindow,
+			args = args or {}
+		}
+		win.button[#win.button+1] = btn
+	end
+	table.insert(window,win)
+	window.current = #window
+	return win
+end
 
 local function bRect(px,py,sx,sy,color,bordercolor)
 	love.graphics.setColor(bordercolor or {1,1,1,1})
@@ -119,7 +136,7 @@ function love.draw()
 	for key, v in ipairs(window) do
 		bRect(v.position[1], v.position[2], v.size[1], v.size[2], v.color)
 		bRect(v.position[1], v.position[2], v.size[1], 12, {1,1,1,1})
-		for key, button in pairs(v.button) do
+		for key, button in ipairs(v.button) do
 			bRect(v.position[1]+button.position[1], v.position[2]+button.position[2], button.size[1], button.size[2],(button.pressed and button.pcolor or button.color))
 		end
 		-- close button
@@ -129,5 +146,8 @@ function love.draw()
 	love.graphics.draw(mouse.cursor[mouse.current], love.mouse.getX() - mouse.cursor[mouse.current]:getWidth() / 2, love.mouse.getY() - mouse.cursor[mouse.current]:getHeight() / 2)
 	love.graphics.pop()
 	love.graphics.print("Current FPS: " .. tostring(love.timer.getFPS()), 1, 1)
-
 end
+
+
+local testwin = newWindow() -- default window
+-- window[1].button.new() -- default btn
