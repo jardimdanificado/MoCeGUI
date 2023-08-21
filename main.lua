@@ -6,22 +6,13 @@ local mouse =
 	draggin = false
 }
 
-local function closeWindow(window)
-	for i, value in ipairs(window) do
-		if value and i ~= window.current then
-			window[window.current] = nil
-			window.current = i
-			return
-		end
-	end
-	window[window.current] = nil
-	window.current = nil
-end
 
-local window = 
-{
-	current = 0
-}
+local window = {}
+
+local function closeWindow()
+	window[1] = nil
+	window = util.array.clear(window)
+end
 
 local function newWindow(title,position,size,color)
 	local win = {
@@ -54,10 +45,11 @@ local function newWindow(title,position,size,color)
 			args = args or {}
 		}
 		btn.position = position or {size[1]-12,0}
-		win.button[#win.button+1] = btn
+		table.insert(win.button,2,btn)
+		return win.button[1]
 	end
-	table.insert(window,win)
-	window.current = #window
+	table.insert(window,2,win)
+	util.array.clear(window)
 	return win
 end
 
@@ -85,99 +77,103 @@ function love.mousemoved( x, y, dx, dy, istouch )
 end
 
 function love.mousereleased(x, y, button)
-	local currentWindow = window[window.current]
-	if button == 1 and currentWindow then
-		for index, _button in ipairs(currentWindow.button) do
-			if x >= currentWindow.position[1] + _button.position[1] + 8 and
-			   x <= currentWindow.position[1] + _button.position[1] + _button.size[1] + 8 and
-			   y >= currentWindow.position[2] + _button.position[2] + 8 and
-			   y <= currentWindow.position[2] + _button.position[2] + _button.size[2] + 8 then
-				_button.func(window)
-				_button.pressed = false
-			end
-		end
-		if mouse.draggin then
-			mouse.draggin = false
-			mouse.current = 1
-		end
-	elseif button == 3 then
-		if mouse.draggin then
-			mouse.draggin = false
-			mouse.current = 1
-		end
-	end
- end
-
- function love.mousepressed(x, y, button, istouch)
-	local currentWindow = window[window.current]
-	if not (x >= currentWindow.position[1] + 8 and
-		x <= currentWindow.position[1] + currentWindow.size[1] + 8 and
-		y >= currentWindow.position[2] + 8 and
-		y <= currentWindow.position[2] + currentWindow.size[2] + 8) then
-			for index, win in pairs(window) do
-				if index ~= 'current' and
-				x >= win.position[1] + 8 and
-				x <= win.position[1] + win.size[1] + 8 and
-				y >= win.position[2] + 8 and
-				y <= win.position[2] + win.size[2] + 8 then
-					window.current = index
-					break
+	if window[1] then
+		if button == 1 then
+			window[1].button = util.array.clear(window[1].button)
+			for index, _button in ipairs(window[1].button) do
+				if _button and _button.position and window[1].position then
+					if x >= window[1].position[1] + _button.position[1] + 8 and
+					   x <= window[1].position[1] + _button.position[1] + _button.size[1] + 8 and
+					   y >= window[1].position[2] + _button.position[2] + 8 and
+					   y <= window[1].position[2] + _button.position[2] + _button.size[2] + 8 then
+						_button.func(window)
+						_button.pressed = false
+					end
 				end
 			end
-	end
-    currentWindow = window[window.current]
-    if button == 1 and currentWindow then
-        if x >= currentWindow.position[1] + 8 and
-           x <= currentWindow.position[1] + currentWindow.size[1] + 8 and
-           y >= currentWindow.position[2] + 8 and
-           y <= currentWindow.position[2] + 20 then
-            mouse.draggin = currentWindow.position
-            mouse.current = 2
-        end
-		for index, _button in ipairs(currentWindow.button) do
-			if x >= currentWindow.position[1] + _button.position[1] + 8 and
-			   x <= currentWindow.position[1] + _button.position[1] + _button.size[1] + 8 and
-			   y >= currentWindow.position[2] + _button.position[2] + 8 and
-			   y <= currentWindow.position[2] + _button.position[2] + _button.size[2] + 8 then
-				_button.pressed = true
+			if mouse.draggin then
+				mouse.draggin = false
+				mouse.current = 1
+			end
+		elseif button == 3 then
+			if mouse.draggin then
+				mouse.draggin = false
+				mouse.current = 1
 			end
 		end
-    elseif button == 3 then
-        if x >= currentWindow.position[1] + 8 and
-           x <= currentWindow.position[1] + currentWindow.size[1] + 8 and
-           y >= currentWindow.position[2] + 8 and
-           y <= currentWindow.position[2] + currentWindow.size[2] + 8 then
-            mouse.draggin = currentWindow.position
-            mouse.current = 2
-        end
-    end
+	end
 end
 
+function love.mousepressed(x, y, button, istouch)
+	if window[1] then
+		if not (x >= window[1].position[1] + 8 and
+			x <= window[1].position[1] + window[1].size[1] + 8 and
+			y >= window[1].position[2] + 8 and
+			y <= window[1].position[2] + window[1].size[2] + 8) then
+				for index, win in pairs(window) do
+					if index ~= 'current' and
+					x >= win.position[1] + 8 and
+					x <= win.position[1] + win.size[1] + 8 and
+					y >= win.position[2] + 8 and
+					y <= win.position[2] + win.size[2] + 8 then
+						local home = window[index]
+						window[index] = nil
+						table.insert(window,1,home)
+						util.array.clear(window)
+						break
+					end
+				end
+		end
+		if button == 1 then
+			if x >= window[1].position[1] + 8 and
+			x <= window[1].position[1] + window[1].size[1] + 8 and
+			y >= window[1].position[2] + 8 and
+			y <= window[1].position[2] + 20 then
+				mouse.draggin = window[1].position
+				mouse.current = 2
+			end
+			for index, _button in ipairs(window[1].button) do
+				if x >= window[1].position[1] + _button.position[1] + 8 and
+				x <= window[1].position[1] + _button.position[1] + _button.size[1] + 8 and
+				y >= window[1].position[2] + _button.position[2] + 8 and
+				y <= window[1].position[2] + _button.position[2] + _button.size[2] + 8 then
+					_button.pressed = true
+				end
+			end
+		elseif button == 3 then
+			if x >= window[1].position[1] + 8 and
+			x <= window[1].position[1] + window[1].size[1] + 8 and
+			y >= window[1].position[2] + 8 and
+			y <= window[1].position[2] + window[1].size[2] + 8 then
+				mouse.draggin = window[1].position
+				mouse.current = 2
+			end
+		elseif button == 2 then
+			if x >= window[1].position[1] + 8 and
+			x <= window[1].position[1] + window[1].size[1] + 8 and
+			y >= window[1].position[2] + 8 and
+			y <= window[1].position[2] + window[1].size[2] + 8 then
+				closeWindow()
+			end
+		end
+	end
+end
 
 function love.update()
 end
 
 function love.draw()
+	window = util.array.clear(window)
 	love.graphics.push()
-	for key, v in pairs(window) do
-		if key ~= 'current' and key ~= window.current then
-			bRect(v.position[1], v.position[2], v.size[1], v.size[2], v.color)
-			bRect(v.position[1], v.position[2], v.size[1], 12, {1,1,1,1})
-			for key, button in ipairs(v.button) do
-				bRect(v.position[1]+button.position[1], v.position[2]+button.position[2], button.size[1], button.size[2],(button.pressed and button.pcolor or button.color))
-			end
-			love.graphics.setColor(unpack(v.color))
-			love.graphics.print(v.title,v.position[1]+14,v.position[2],0,0.8,0.8)
+	for index = #window, 1, -1 do
+		local v = window[index]
+		bRect(v.position[1], v.position[2], v.size[1], v.size[2], v.color)
+		bRect(v.position[1], v.position[2], v.size[1], 12, {1,1,1,1})
+		for key, button in ipairs(v.button) do
+			bRect(v.position[1]+button.position[1], v.position[2]+button.position[2], button.size[1], button.size[2],(button.pressed and button.pcolor or button.color))
 		end
-	end
-	if window[window.current] then
-		bRect(window[window.current].position[1], window[window.current].position[2], window[window.current].size[1], window[window.current].size[2], window[window.current].color)
-		bRect(window[window.current].position[1], window[window.current].position[2], window[window.current].size[1], 12, {1,1,1,1})
-		for key, button in ipairs(window[window.current].button) do
-			bRect(window[window.current].position[1]+button.position[1], window[window.current].position[2]+button.position[2], button.size[1], button.size[2],(button.pressed and button.pcolor or button.color))
-		end
-		love.graphics.setColor(unpack(window[window.current].color))
-		love.graphics.print(window[window.current].title,window[window.current].position[1]+14,window[window.current].position[2],0,0.8,0.8)
+		love.graphics.setColor(unpack(v.color))
+		love.graphics.print(v.title,v.position[1]+14,v.position[2],0,0.8,0.8)
 	end
 	love.graphics.setColor(1,1,1,1)
 	love.graphics.draw(mouse.cursor[mouse.current], love.mouse.getX() - mouse.cursor[mouse.current]:getWidth() / 2, love.mouse.getY() - mouse.cursor[mouse.current]:getHeight() / 2)
@@ -185,7 +181,11 @@ function love.draw()
 	love.graphics.print("Current FPS: " .. tostring(love.timer.getFPS()), 1, 1)
 end
 
-
+local counter = 0
 local testwin = newWindow() -- default window
 local testwin2 = newWindow('title?',{311,180},{80,60},{0.3,0.4,0.5,1}) -- default window
+local button = testwin2.button.new({20,24},{32,16},function ()
+	counter = counter + 1
+	newWindow("window " .. counter,{util.random(0,love.graphics.getWidth()/2),util.random(0,love.graphics.getHeight()/2)-16},{util.random(0,love.graphics.getWidth()/2)+16,util.random(0,love.graphics.getHeight()/2)+16})
+end)
 -- window[1].button.new() -- default btn
