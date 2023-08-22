@@ -14,12 +14,24 @@ local function closeWindow()
 	window = util.array.clear(window)
 end
 
-local function newWindow(title,position,size,color)
+local function newWindow(title,position,size,color,clean)
 	local win = {
 		color= color or {0.3,0.3,0.4,1},
 		position= position or {50,50},
 		size=size or {300,110},
-		button = 
+		clean = clean or false,
+		button = (clean or not title) and 
+		{
+			{
+				position = {0,0},
+				size = {0,0},
+				color = {0,0,0,0},
+				pcolor = {0,0,0,0},
+				func = function ()
+				end,
+				args = {}
+			}
+		} or
 		{
 			{
 				position = {0,0},
@@ -31,10 +43,9 @@ local function newWindow(title,position,size,color)
 			}
 		},
 		hide = false,
-		title = title or 'JLsZ|::>>Ç#@#)!(%%LFsafa)generic title'
+		title = title
 	}
-	position = {win.size[1]-12,0}
-	win.button[1].args[1] = window
+	--position = {win.size[1]-12,0}
 	win.button.new = function(position,size,func,args,color,pcolor)
 		local btn = {
 			position = position or {300-12,0},
@@ -61,8 +72,9 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 end
 
 function love.load()
-  mouse.cursor[1] = love.graphics.newImage("png/cursor-pointer-18.png")
-  mouse.cursor[2] = love.graphics.newImage("png/cursor-direction-25.png")
+  mouse.cursor[1] = love.graphics.newImage("png/cursor-pointer-1.png")
+  mouse.cursor[2] = love.graphics.newImage("png/cursor-direction-8.png")
+  mouse.cursor[3] = love.graphics.newImage("png/cursor-pointer-18.png")
   love.mouse.setVisible(false)
 end
 
@@ -73,6 +85,27 @@ function love.mousemoved( x, y, dx, dy, istouch )
 	if mouse.draggin then
 		mouse.draggin[1] = mouse.draggin[1] + dx
 		mouse.draggin[2] = mouse.draggin[2] + dy
+	end
+	if window[1] then
+		for index, win in pairs(window) do
+			if x >= win.position[1]  and
+			x <= win.position[1] + win.size[1]  and
+			y >= win.position[2]  and
+			y <= win.position[2] + win.size[2]  then
+				for index, _button in ipairs(window[1].button) do
+					if _button and _button.position and window[1] and window[1].position then
+						if x >= window[1].position[1] + _button.position[1]  and
+						   x <= window[1].position[1] + _button.position[1] + _button.size[1]  and
+						   y >= window[1].position[2] + _button.position[2]  and
+						   y <= window[1].position[2] + _button.position[2] + _button.size[2]  then
+							mouse.current = 3
+							return
+						end
+					end
+				end
+			end
+		end
+		mouse.current = 1
 	end
 end
 
@@ -100,6 +133,13 @@ function love.mousereleased(x, y, button)
 				mouse.draggin = false
 				mouse.current = 1
 			end
+		elseif button == 2 then
+			if x >= window[1].position[1]  and
+			x <= window[1].position[1] + window[1].size[1]  and
+			y >= window[1].position[2]  and
+			y <= window[1].position[2] + window[1].size[2]  then
+				closeWindow()
+			end
 		end
 	end
 end
@@ -111,8 +151,7 @@ function love.mousepressed(x, y, button, istouch)
 			y >= window[1].position[2]  and
 			y <= window[1].position[2] + window[1].size[2] ) then
 				for index, win in pairs(window) do
-					if index ~= 'current' and
-					x >= win.position[1]  and
+					if x >= win.position[1]  and
 					x <= win.position[1] + win.size[1]  and
 					y >= win.position[2]  and
 					y <= win.position[2] + win.size[2]  then
@@ -125,7 +164,8 @@ function love.mousepressed(x, y, button, istouch)
 				end
 		end
 		if button == 1 then
-			if x >= window[1].position[1]  and
+			if window[1].title and
+			x >= window[1].position[1]  and
 			x <= window[1].position[1] + window[1].size[1]  and
 			y >= window[1].position[2]  and
 			y <= window[1].position[2] + 20 then
@@ -148,13 +188,6 @@ function love.mousepressed(x, y, button, istouch)
 				mouse.draggin = window[1].position
 				mouse.current = 2
 			end
-		elseif button == 2 then
-			if x >= window[1].position[1]  and
-			x <= window[1].position[1] + window[1].size[1]  and
-			y >= window[1].position[2]  and
-			y <= window[1].position[2] + window[1].size[2]  then
-				closeWindow()
-			end
 		end
 	end
 end
@@ -168,12 +201,14 @@ function love.draw()
 	for index = #window, 1, -1 do
 		local v = window[index]
 		bRect(v.position[1], v.position[2], v.size[1], v.size[2], v.color)
-		bRect(v.position[1], v.position[2], v.size[1], 12, {1,1,1,1})
+		if v.title then
+			bRect(v.position[1], v.position[2], v.size[1], 12, {1,1,1,1})
+			love.graphics.setColor(unpack(v.color))
+			love.graphics.print(v.title,v.position[1]+(v.clean and 0 or 14),v.position[2],0,0.8,0.8)
+		end
 		for key, button in ipairs(v.button) do
 			bRect(v.position[1]+button.position[1], v.position[2]+button.position[2], button.size[1], button.size[2],(button.pressed and button.pcolor or button.color))
 		end
-		love.graphics.setColor(unpack(v.color))
-		love.graphics.print(v.title,v.position[1]+14,v.position[2],0,0.8,0.8)
 	end
 	love.graphics.setColor(1,1,1,1)
 	love.graphics.draw(mouse.cursor[mouse.current], love.mouse.getX(), love.mouse.getY() )
@@ -183,7 +218,7 @@ end
 
 local counter = 0
 local testwin = newWindow() -- default window
-local testwin2 = newWindow('title?',{311,180},{80,60},{0.3,0.4,0.5,1}) -- default window
+local testwin2 = newWindow('window spawner',{311,180},{80,60},{0.3,0.4,0.5,1},true) -- default window
 local button = testwin2.button.new({20,24},{32,16},function ()
 	counter = counter + 1
 	newWindow("window " .. counter,{util.random(0,love.graphics.getWidth()/2),util.random(0,love.graphics.getHeight()/2)-16},{util.random(0,love.graphics.getWidth()/2)+16,util.random(0,love.graphics.getHeight()/2)+16})
