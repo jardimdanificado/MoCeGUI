@@ -1,4 +1,4 @@
-local mocegui,util = require "mocegui"
+local mocegui = require "mocegui"
 
 function love.load()
 	mocegui.load()
@@ -34,7 +34,7 @@ defwin.text.new('Right mouse button close windows.\nMiddle mouse button move win
 local windowspawner = mocegui.newWindow('window spawner',{(love.graphics.getWidth()/2)-50,148},{100,60},{0.3,0.4,0.5,1}) -- default window
 windowspawner.button.new({windowspawner.size[1]/2-16,windowspawner.size[2]/2-4},{32,16},function ()
 	counter = counter + 1
-	mocegui.newWindow("window " .. counter,{util.random(0,love.graphics.getWidth()/2),util.random(0,love.graphics.getHeight()/2)-16},{util.random(0,love.graphics.getWidth()/2)+16,util.random(0,love.graphics.getHeight()/2)+16})
+	mocegui.newWindow("window " .. counter,{mocegui.util.random(0,love.graphics.getWidth()/2),mocegui.util.random(0,love.graphics.getHeight()/2)-16},{mocegui.util.random(0,love.graphics.getWidth()/2)+16,mocegui.util.random(0,love.graphics.getHeight()/2)+16})
 end)
 
 return mocegui

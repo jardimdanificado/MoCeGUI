@@ -1,7 +1,8 @@
 --Mouse Centered Graphical User Interface(MoCeGUI)
-local mocegui={version="0.1.1"}
+local mocegui={version="0.1.2"}
 package.path = 'mocegui/util/?.lua' .. ";" .. package.path
 local util = require "mocegui.luatils"
+mocegui.util = util
 local mouse =
 {
 	draggin = false
@@ -75,8 +76,9 @@ end
 function mocegui.load()
 	local iconImageData = love.image.newImageData("mocegui/png/icon.png")
     love.window.setIcon(iconImageData)
-	love.window.setTitle("MoCeGUI" .. mocegui.version)
+	love.window.setTitle("MoCeGUI-" .. mocegui.version)
 	mocegui.titlecache = love.window.getTitle()
+	print(mocegui.titlecache)
 end
 
 function mocegui.keypressed(key)
