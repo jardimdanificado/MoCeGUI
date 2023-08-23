@@ -1,4 +1,4 @@
---Mouse Centered Graphical User Interface(MoCeGUIn)
+--Mouse Centered Graphical User Interface(MoCeGUI)
 local util = require "util"
 local mouse =
 {
@@ -71,7 +71,7 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 end
 
 function love.load()
-	moceguin.titlecache = love.window.getTitle()
+	mocegui.titlecache = love.window.getTitle()
 end
 
 function love.keypressed(key)
@@ -186,7 +186,7 @@ function love.draw()
 	end
 	love.graphics.setColor(1,1,1,1)
 	love.graphics.pop()
-	love.graphics.print(moceguin.titlecache .. "\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #window, 1, 1)
+	love.graphics.print(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #window, 1, 1)
 end
 
 local counter = 0

@@ -1,4 +1,4 @@
-moceguin={version="0.0.7"}
+mocegui={version="0.0.7"}
 
 function love.conf(t)
     t.identity = nil                    -- The name of the save directory (string)
@@ -12,7 +12,7 @@ function love.conf(t)
     t.audio.mic = false                 -- Request and use microphone capabilities in Android (boolean)
     t.audio.mixwithsystem = true        -- Keep background music playing when opening LOVE (boolean, iOS and Android only)
 
-    t.window.title = "MoCeGUIn" .. moceguin.version -- The window title (string)
+    t.window.title = "MoCeGUI" .. mocegui.version -- The window title (string)
     t.window.icon = "png/icon64x64.png"      -- Filepath to an image to use as the window's icon (string)
     t.window.width = 384                -- The window width (number)
     t.window.height = 216               -- The window height (number)
