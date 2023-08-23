@@ -1,9 +1,9 @@
+--Mouse Centered Graphical User Interface(MoCeGUIn)
 local util = require "util"
 local mouse = 
 {
 	draggin = false
 }
-
 
 local window = {}
 
@@ -16,8 +16,8 @@ local function newWindow(title,position,size,color)
 	local win = 
 	{
 		color= color or {0.3,0.3,0.4,1},
-		position= position or {50,50},
-		size=size or {300,110},
+		position= position or {16,16},
+		size=size or {16,16},
 		text = {},
 		button = not title and 
 		{
@@ -71,6 +71,7 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 end
 
 function love.load()
+	moceguin.titlecache = ("MoCeGUIn" .. moceguin.version)
 end
 
 function love.keypressed(key)
@@ -119,21 +120,18 @@ end
 function love.mousepressed(x, y, button, istouch)
 	if window[1] then
 		if not (x >= window[1].position[1]  and
-			x <= window[1].position[1] + window[1].size[1]  and
-			y >= window[1].position[2]  and
-			y <= window[1].position[2] + window[1].size[2] ) then
-				for index, win in pairs(window) do
-					if x >= win.position[1]  and
-					x <= win.position[1] + win.size[1]  and
-					y >= win.position[2]  and
-					y <= win.position[2] + win.size[2]  then
-						local home = window[index]
-						window[index] = nil
-						table.insert(window,1,home)
-						util.array.clear(window)
-						break
-					end
+		x <= window[1].position[1] + window[1].size[1]  and
+		y >= window[1].position[2]  and
+		y <= window[1].position[2] + window[1].size[2] ) then
+			for index, win in pairs(window) do
+				if x >= win.position[1]  and
+				x <= win.position[1] + win.size[1]  and
+				y >= win.position[2]  and
+				y <= win.position[2] + win.size[2]  then
+					util.table.move(window,index,1)
+					break
 				end
+			end
 		end
 		if button == 1 then
 			if window[1].title and
@@ -188,14 +186,13 @@ function love.draw()
 	end
 	love.graphics.setColor(1,1,1,1)
 	love.graphics.pop()
-	love.graphics.print("Current FPS: " .. tostring(love.timer.getFPS()), 1, 1)
+	love.graphics.print(moceguin.titlecache .. "\nCurrent FPS: " .. tostring(love.timer.getFPS()), 1, 1)
 end
 
 local counter = 0
-local defwin = newWindow() -- default window
-defwin.text.new('sample text',{16,16})
-
-local windowspawner = newWindow('window spawner',{311,180},{100,60},{0.3,0.4,0.5,1}) -- default window
+local defwin = newWindow(nil,{(love.graphics.getWidth()/2)-144,40},{288,94}) -- default window
+defwin.text.new('Right mouse button close windows.\nMiddle mouse button move windows.\nLeft mouse button interacts, and also move\nwindows if click on title bar.\nWhen a window got title bar it also got a close\nbutton on top-right',{4,4})
+local windowspawner = newWindow('window spawner',{(love.graphics.getWidth()/2)-50,148},{100,60},{0.3,0.4,0.5,1}) -- default window
 windowspawner.button.new({windowspawner.size[1]/2-16,windowspawner.size[2]/2-4},{32,16},function ()
 	counter = counter + 1
 	newWindow("window " .. counter,{util.random(0,love.graphics.getWidth()/2),util.random(0,love.graphics.getHeight()/2)-16},{util.random(0,love.graphics.getWidth()/2)+16,util.random(0,love.graphics.getHeight()/2)+16})
