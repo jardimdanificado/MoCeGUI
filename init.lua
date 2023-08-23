@@ -20,6 +20,7 @@ end
 function mocegui.newWindow(title,position,size,color)
 	local win = 
 	{
+		func = nil,
 		color= color or {0.3,0.3,0.4,1},
 		position= position or {16,16},
 		size=size or {16,16},
@@ -43,7 +44,7 @@ function mocegui.newWindow(title,position,size,color)
 	win.text.new = function(text,position,size,color,pcolor)
 		local txt = {
 			position = position or {0,0},
-			size = size or 12,
+			size = size or {1,1},
 			color = color or {1,1,1,1},
 			text = text or 'blank'
 		}
@@ -80,6 +81,14 @@ function mocegui.load()
     love.window.setIcon(iconImageData)
 	love.window.setTitle("MoCeGUI-" .. mocegui.version)
 	mocegui.titlecache = love.window.getTitle()
+
+	local debugwin = mocegui.newWindow('debug window',{1,1},{110,56})
+	debugwin.text.new(mocegui.titlecache, {1,14},{0.9,0.9})
+	local debugtxt = debugwin.text.new("\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #window, {1,14},{0.9,0.9})
+	debugwin.func = function ()
+		debugtxt.text = "\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #window
+	end
+
 	print(mocegui.titlecache)
 end
 
@@ -172,6 +181,7 @@ function mocegui.mousepressed(x, y, button, istouch)
 end
 
 function mocegui.update()
+
 end
 
 function mocegui.draw()
@@ -179,9 +189,11 @@ function mocegui.draw()
 	love.graphics.push()
 	for index = #window, 1, -1 do
 		local v = window[index]
-		
+		if v.func then
+			v.func(v.args and unpack(v.args) or 0)
+		end
 		if v.title then
-			love.graphics.setColor(1,1,1,1 )
+			love.graphics.setColor(1,1,1,1)
 			love.graphics.rectangle('fill', v.position[1]-1, v.position[2]-1, v.size[1]+2, v.size[2]+2)
 			love.graphics.setColor(unpack(v.color))
 			love.graphics.rectangle('fill', v.position[1], v.position[2]+13, v.size[1], v.size[2]-13)
@@ -199,12 +211,11 @@ function mocegui.draw()
 		end
 		for key, text in ipairs(v.text) do
 			love.graphics.setColor(unpack(text.color))
-			love.graphics.print(text.text, v.position[1]+text.position[1], v.position[2]+text.position[2])
+			love.graphics.print(text.text, v.position[1]+text.position[1], v.position[2]+text.position[2], 0,text.size[1], text.size[2])
 		end
 	end
 	love.graphics.setColor(1,1,1,1)
 	love.graphics.pop()
-	love.graphics.print(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #window, 1, 1)
 end
 
 mocegui.window = window
