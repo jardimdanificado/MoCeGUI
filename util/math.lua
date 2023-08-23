@@ -145,4 +145,31 @@ _math.rotate = function(position, pivot, angle)
     })
 end
 
+_math.primo = function (num)
+    for i = 2, num, 1 do
+        if num%i == 0 then
+            return false,i
+        end
+    end
+    return true
+end
+
+_math.mmc = function (...)
+    local bulkcheck = function (i,...)
+        local a = 0
+        for index, value in pairs({...}) do
+            a = a + (i%value == 0 and 1 or 0)
+        end
+        if a == #{...} then
+            return true
+        end
+    end
+    local min = math.min(...)
+    local i = min
+    while not bulkcheck(i,...) do
+        i = i + 1
+    end
+    return i
+end
+
 return _math

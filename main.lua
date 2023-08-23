@@ -1,8 +1,6 @@
 local util = require "util"
 local mouse = 
 {
-	current = 1,
-	cursor = {},
 	draggin = false
 }
 
@@ -14,27 +12,19 @@ local function closeWindow()
 	window = util.array.clear(window)
 end
 
-local function newWindow(title,position,size,color,clean)
-	local win = {
+local function newWindow(title,position,size,color)
+	local win = 
+	{
 		color= color or {0.3,0.3,0.4,1},
 		position= position or {50,50},
 		size=size or {300,110},
-		clean = clean or false,
-		button = (clean or not title) and 
+		text = {},
+		button = not title and 
 		{
-			{
-				position = {0,0},
-				size = {0,0},
-				color = {0,0,0,0},
-				pcolor = {0,0,0,0},
-				func = function ()
-				end,
-				args = {}
-			}
 		} or
 		{
 			{
-				position = {0,0},
+				position = {(size and size[1] or 50)-12,0},
 				size = {12,12},
 				color = {1,0.5,0.5,1},
 				pcolor = {0.5,0.1,0.1,1},
@@ -45,18 +35,27 @@ local function newWindow(title,position,size,color,clean)
 		hide = false,
 		title = title
 	}
-	--position = {win.size[1]-12,0}
+	win.text.new = function(text,position,size,color,pcolor)
+		local txt = {
+			position = position or {0,0},
+			size = size or 12,
+			color = color or {1,1,1,1},
+			text = text or 'blank'
+		}
+		table.insert(win.text,1,txt)
+		return win.text[1]
+	end
 	win.button.new = function(position,size,func,args,color,pcolor)
 		local btn = {
-			position = position or {300-12,0},
+			position = position,
 			size = size or {12,12},
-			color = color or {1,0.5,0.5,1},
+			color = color or {0,0.5,0.5,1},
 			pcolor = pcolor or {0.5,0.1,0.1,1},
 			func = func or closeWindow,
 			args = args or {}
 		}
 		btn.position = position or {size[1]-12,0}
-		table.insert(win.button,2,btn)
+		table.insert(win.button,1,btn)
 		return win.button[1]
 	end
 	table.insert(window,2,win)
@@ -72,10 +71,6 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 end
 
 function love.load()
-  mouse.cursor[1] = love.graphics.newImage("png/cursor-pointer-1.png")
-  mouse.cursor[2] = love.graphics.newImage("png/cursor-direction-8.png")
-  mouse.cursor[3] = love.graphics.newImage("png/cursor-pointer-18.png")
-  love.mouse.setVisible(false)
 end
 
 function love.keypressed(key)
@@ -85,27 +80,6 @@ function love.mousemoved( x, y, dx, dy, istouch )
 	if mouse.draggin then
 		mouse.draggin[1] = mouse.draggin[1] + dx
 		mouse.draggin[2] = mouse.draggin[2] + dy
-	end
-	if window[1] then
-		for index, win in pairs(window) do
-			if x >= win.position[1]  and
-			x <= win.position[1] + win.size[1]  and
-			y >= win.position[2]  and
-			y <= win.position[2] + win.size[2]  then
-				for index, _button in ipairs(window[1].button) do
-					if _button and _button.position and window[1] and window[1].position then
-						if x >= window[1].position[1] + _button.position[1]  and
-						   x <= window[1].position[1] + _button.position[1] + _button.size[1]  and
-						   y >= window[1].position[2] + _button.position[2]  and
-						   y <= window[1].position[2] + _button.position[2] + _button.size[2]  then
-							mouse.current = 3
-							return
-						end
-					end
-				end
-			end
-		end
-		mouse.current = 1
 	end
 end
 
@@ -126,12 +100,10 @@ function love.mousereleased(x, y, button)
 			end
 			if mouse.draggin then
 				mouse.draggin = false
-				mouse.current = 1
 			end
 		elseif button == 3 then
 			if mouse.draggin then
 				mouse.draggin = false
-				mouse.current = 1
 			end
 		elseif button == 2 then
 			if x >= window[1].position[1]  and
@@ -204,23 +176,27 @@ function love.draw()
 		if v.title then
 			bRect(v.position[1], v.position[2], v.size[1], 12, {1,1,1,1})
 			love.graphics.setColor(unpack(v.color))
-			love.graphics.print(v.title,v.position[1]+(v.clean and 0 or 14),v.position[2],0,0.8,0.8)
+			love.graphics.print(v.title,v.position[1],v.position[2],0,0.8,0.8)
 		end
 		for key, button in ipairs(v.button) do
 			bRect(v.position[1]+button.position[1], v.position[2]+button.position[2], button.size[1], button.size[2],(button.pressed and button.pcolor or button.color))
 		end
+		for key, text in ipairs(v.text) do
+			love.graphics.setColor(unpack(text.color))
+			love.graphics.print(text.text, v.position[1]+text.position[1], v.position[2]+text.position[2])
+		end
 	end
 	love.graphics.setColor(1,1,1,1)
-	love.graphics.draw(mouse.cursor[mouse.current], love.mouse.getX(), love.mouse.getY() )
 	love.graphics.pop()
 	love.graphics.print("Current FPS: " .. tostring(love.timer.getFPS()), 1, 1)
 end
 
 local counter = 0
-local testwin = newWindow() -- default window
-local testwin2 = newWindow('window spawner',{311,180},{80,60},{0.3,0.4,0.5,1},true) -- default window
-local button = testwin2.button.new({20,24},{32,16},function ()
+local defwin = newWindow() -- default window
+defwin.text.new('sample text',{16,16})
+
+local windowspawner = newWindow('window spawner',{311,180},{100,60},{0.3,0.4,0.5,1}) -- default window
+windowspawner.button.new({windowspawner.size[1]/2-16,windowspawner.size[2]/2-4},{32,16},function ()
 	counter = counter + 1
 	newWindow("window " .. counter,{util.random(0,love.graphics.getWidth()/2),util.random(0,love.graphics.getHeight()/2)-16},{util.random(0,love.graphics.getWidth()/2)+16,util.random(0,love.graphics.getHeight()/2)+16})
 end)
--- window[1].button.new() -- default btn
