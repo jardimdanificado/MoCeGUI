@@ -1,6 +1,6 @@
 --Mouse Centered Graphical User Interface(MoCeGUI)
-local mocegui={version="0.0.8"}
-local util = require "util"
+local mocegui={version="0.0.10"}
+local util = require "mocegui.util"
 local mouse =
 {
 	draggin = false
@@ -29,7 +29,7 @@ function mocegui.newWindow(title,position,size,color)
 				size = {12,12},
 				color = {1,0.5,0.5,1},
 				pcolor = {0.5,0.1,0.1,1},
-				func = closeWindow,
+				func = mocegui.closeWindow,
 				args = {}
 			}
 		},
@@ -52,7 +52,7 @@ function mocegui.newWindow(title,position,size,color)
 			size = size or {12,12},
 			color = color or {0,0.5,0.5,1},
 			pcolor = pcolor or {0.5,0.1,0.1,1},
-			func = func or closeWindow,
+			func = func or mocegui.closeWindow,
 			args = args or {}
 		}
 		btn.position = position or {size[1]-12,0}
@@ -113,7 +113,7 @@ function mocegui.mousereleased(x, y, button)
 			x <= window[1].position[1] + window[1].size[1]  and
 			y >= window[1].position[2]  and
 			y <= window[1].position[2] + window[1].size[2]  then
-				closeWindow()
+				mocegui.closeWindow()
 			end
 		end
 	end
@@ -193,4 +193,4 @@ end
 
 mocegui.window = window
 mocegui.mouse = mouse
-return mocegui,util
+return mocegui

@@ -11,7 +11,7 @@ function love.conf(t)
     t.audio.mixwithsystem = true        -- Keep background music playing when opening LOVE (boolean, iOS and Android only)
 
     t.window.title = "MoCeGUI" -- The window title (string)
-    t.window.icon = "png/icon64x64.png"      -- Filepath to an image to use as the window's icon (string)
+    t.window.icon = "mocegui/png/icon64x64.png"      -- Filepath to an image to use as the window's icon (string)
     t.window.width = 384                -- The window width (number)
     t.window.height = 216               -- The window height (number)
     t.window.borderless = false         -- Remove all border visuals from the window (boolean)
