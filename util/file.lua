@@ -1,3 +1,4 @@
+local _string = require "util.string"
 local file = {}
 file.save = {}
 file.load = {}
@@ -114,10 +115,10 @@ end
 
 file.load.map = function(filepath)
     local text = file.load.text(filepath)
-    local spl = util.string.split(text, "\n")
+    local spl = _string.split(text, "\n")
     local result = {}
     for x, v in spl do
-        v = util.string.split(v, " ")
+        v = _string.split(v, " ")
         result[x] = {}
         for y, l in ipairs(v) do
             result[x][y] = l

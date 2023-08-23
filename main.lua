@@ -1,6 +1,6 @@
 --Mouse Centered Graphical User Interface(MoCeGUIn)
 local util = require "util"
-local mouse = 
+local mouse =
 {
 	draggin = false
 }
@@ -71,7 +71,7 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 end
 
 function love.load()
-	moceguin.titlecache = ("MoCeGUIn" .. moceguin.version)
+	moceguin.titlecache = love.window.getTitle()
 end
 
 function love.keypressed(key)
@@ -186,11 +186,11 @@ function love.draw()
 	end
 	love.graphics.setColor(1,1,1,1)
 	love.graphics.pop()
-	love.graphics.print(moceguin.titlecache .. "\nCurrent FPS: " .. tostring(love.timer.getFPS()), 1, 1)
+	love.graphics.print(moceguin.titlecache .. "\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #window, 1, 1)
 end
 
 local counter = 0
-local defwin = newWindow(nil,{(love.graphics.getWidth()/2)-144,40},{288,94}) -- default window
+local defwin = newWindow(nil,{(love.graphics.getWidth()/2)-144,48},{288,94}) -- default window
 defwin.text.new('Right mouse button close windows.\nMiddle mouse button move windows.\nLeft mouse button interacts, and also move\nwindows if click on title bar.\nWhen a window got title bar it also got a close\nbutton on top-right',{4,4})
 local windowspawner = newWindow('window spawner',{(love.graphics.getWidth()/2)-50,148},{100,60},{0.3,0.4,0.5,1}) -- default window
 windowspawner.button.new({windowspawner.size[1]/2-16,windowspawner.size[2]/2-4},{32,16},function ()

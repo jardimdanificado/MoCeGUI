@@ -1,4 +1,4 @@
-moceguin={version="0.0.6"}
+moceguin={version="0.0.7"}
 
 function love.conf(t)
     t.identity = nil                    -- The name of the save directory (string)
