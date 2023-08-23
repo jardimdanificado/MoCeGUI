@@ -36,14 +36,14 @@ util.char =
     [248] = 'ø', [249] = 'ù', [250] = 'ú', [251] = 'û', [252] = 'ü', [253] = 'ý', [254] = 'þ', [255] = 'ÿ',
 }
 
-util.math = require "mocegui.util.math"
-util.string = require "mocegui.util.string"
-util.table = require "mocegui.util.table"
-util.array = require "mocegui.util.array"
-util.matrix = require "mocegui.util.matrix"
-util.file = require "mocegui.util.file"
-util.encode = require "mocegui.util.encode"
-util.console = require "mocegui.util.console"
+util.math = require "_math"
+util.string = require "_string"
+util.table = require "_table"
+util.array = require "_array"
+util.matrix = require "_matrix"
+util.file = require "_file"
+util.encode = require "_encode"
+util.console = require "_console"
 
 util.isjit = function(iftrue,ifalse)
     return (jit and jit.version) and (iftrue or true) or (ifalse or false)

@@ -1,5 +1,3 @@
-local array = require "mocegui.util.array"
-
 local _table = {}
 
 _table.assign = function(obj1, obj2)

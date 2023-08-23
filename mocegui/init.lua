@@ -1,6 +1,7 @@
 --Mouse Centered Graphical User Interface(MoCeGUI)
-local mocegui={version="0.0.10"}
-local util = require "mocegui.util"
+local mocegui={version="0.1.1"}
+package.path = 'mocegui/util/?.lua' .. ";" .. package.path
+local util = require "mocegui.luatils"
 local mouse =
 {
 	draggin = false
@@ -72,6 +73,8 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 end
 
 function mocegui.load()
+	local iconImageData = love.image.newImageData("mocegui/png/icon.png")
+    love.window.setIcon(iconImageData)
 	love.window.setTitle("MoCeGUI" .. mocegui.version)
 	mocegui.titlecache = love.window.getTitle()
 end

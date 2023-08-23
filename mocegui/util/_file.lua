@@ -1,4 +1,4 @@
-local _string = require "mocegui.util.string"
+local _string = require "string"
 local file = {}
 file.save = {}
 file.load = {}
