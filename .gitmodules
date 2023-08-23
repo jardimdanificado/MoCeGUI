@@ -1,3 +1,6 @@
 [submodule "mocegui/luatils"]
-	path = mocegui/luatils
+	path = luatils
+	url = https://github.com/jardimdanificado/luatils
+[submodule "luatils"]
+	path = luatils
 	url = https://github.com/jardimdanificado/luatils
