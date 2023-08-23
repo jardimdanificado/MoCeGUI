@@ -1,4 +1,5 @@
 --Mouse Centered Graphical User Interface(MoCeGUI)
+local mocegui={version="0.0.8"}
 local util = require "util"
 local mouse =
 {
@@ -71,6 +72,7 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 end
 
 function mocegui.load()
+	love.window.setTitle("MoCeGUI" .. mocegui.version)
 	mocegui.titlecache = love.window.getTitle()
 end
 
@@ -191,4 +193,4 @@ end
 
 mocegui.window = window
 mocegui.mouse = mouse
-return mocegui
+return mocegui,util

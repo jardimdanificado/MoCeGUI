@@ -1,5 +1,4 @@
-local util = require "util"
-local mocegui = require "mocegui"
+local mocegui,util = require "mocegui"
 
 function love.load()
 	mocegui.load()
