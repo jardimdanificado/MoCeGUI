@@ -177,14 +177,23 @@ function mocegui.draw()
 	love.graphics.push()
 	for index = #window, 1, -1 do
 		local v = window[index]
-		bRect(v.position[1], v.position[2], v.size[1], v.size[2], v.color)
+		
 		if v.title then
-			bRect(v.position[1], v.position[2], v.size[1], 12, {1,1,1,1})
+			love.graphics.setColor(unpack(v.pcolor))
+			love.graphics.rectangle('fill', v.position[1]-1, v.position[2]-1, v.size[1]+2, v.size[2]+2)
 			love.graphics.setColor(unpack(v.color))
+			love.graphics.rectangle('fill', v.position[1], v.position[2]+12, v.size[1], v.size[2]-12)
 			love.graphics.print(v.title,v.position[1],v.position[2],0,0.8,0.8)
+		else
+			bRect(v.position[1], v.position[2]+12, v.size[1], v.size[2]-12, v.color)
 		end
 		for key, button in ipairs(v.button) do
-			bRect(v.position[1]+button.position[1], v.position[2]+button.position[2], button.size[1], button.size[2],(button.pressed and button.pcolor or button.color))
+			if button.func ~= mocegui.closeWindow then
+				bRect(v.position[1]+button.position[1], v.position[2]+button.position[2], button.size[1], button.size[2],(button.pressed and button.pcolor or button.color))
+			else
+				love.graphics.setColor(unpack(button.pressed and button.pcolor or button.color))
+				love.graphics.rectangle('fill',v.position[1]+button.position[1], v.position[2]+button.position[2], button.size[1], button.size[2])
+			end
 		end
 		for key, text in ipairs(v.text) do
 			love.graphics.setColor(unpack(text.color))
