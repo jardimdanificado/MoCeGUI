@@ -1,5 +1,5 @@
 --Mouse Centered Graphical User Interface(MoCeGUI)
-local mocegui={version="0.1.3"}
+local mocegui={version="0.1.4"}
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
 local util = require "mocegui.luatils"
 mocegui.util = util
