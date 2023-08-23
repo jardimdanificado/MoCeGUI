@@ -1,5 +1,5 @@
 --Mouse Centered Graphical User Interface(MoCeGUI)
-local mocegui={version="0.1.5"}
+local mocegui={version="0.1.6"}
 local requirePath = love.filesystem.getRequirePath()
 love.filesystem.setRequirePath('mocegui/luatils/?.lua;' .. requirePath)
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
