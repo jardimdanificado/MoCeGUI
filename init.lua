@@ -182,7 +182,7 @@ function mocegui.draw()
 			love.graphics.setColor(1,1,1,1 )
 			love.graphics.rectangle('fill', v.position[1]-1, v.position[2]-1, v.size[1]+2, v.size[2]+2)
 			love.graphics.setColor(unpack(v.color))
-			love.graphics.rectangle('fill', v.position[1], v.position[2]+12, v.size[1], v.size[2]-12)
+			love.graphics.rectangle('fill', v.position[1], v.position[2]+13, v.size[1], v.size[2]-13)
 			love.graphics.print(v.title,v.position[1],v.position[2],0,0.8,0.8)
 		else
 			bRect(v.position[1], v.position[2], v.size[1], v.size[2], v.color)
