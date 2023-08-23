@@ -179,7 +179,7 @@ function mocegui.draw()
 		local v = window[index]
 		
 		if v.title then
-			love.graphics.setColor(unpack(v.pcolor) or {1,1,1,1})
+			love.graphics.setColor(unpack(v.pcolor or {1,1,1,1}) )
 			love.graphics.rectangle('fill', v.position[1]-1, v.position[2]-1, v.size[1]+2, v.size[2]+2)
 			love.graphics.setColor(unpack(v.color))
 			love.graphics.rectangle('fill', v.position[1], v.position[2]+12, v.size[1], v.size[2]-12)
