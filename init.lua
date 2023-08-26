@@ -1,4 +1,10 @@
 --Mouse Centered Graphical User Interface(MoCeGUI)
+if not rl then
+    gl = '21'
+    rl = require('mocegui.lib.raylib')
+    gl = nil
+end
+
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
 local mocegui={version="0.1.7",pending = {},font={}}
 local util = require "mocegui.luatils.init"
@@ -81,7 +87,7 @@ function mocegui.newWindow(title,position,size,color)
 		return win.button[1]
 	end
 	table.insert(mocegui.window,2,win)
-	util.array.clear(mocegui.window)
+	mocegui.window = util.array.clear(mocegui.window)
 	return win
 end
 
