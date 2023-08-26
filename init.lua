@@ -10,11 +10,11 @@ local mouse =
 	draggin = false
 }
 
-local window = {}
+mocegui.window = {}
 
 function mocegui.closeWindow()
-	window[1] = nil
-	window = util.array.clear(window)
+	mocegui.window[1] = nil
+	util.array.selfclear(mocegui.window)
 end
 
 function mocegui.newWindow(title,position,size,color)
@@ -64,8 +64,8 @@ function mocegui.newWindow(title,position,size,color)
 		table.insert(win.button,1,btn)
 		return win.button[1]
 	end
-	table.insert(window,2,win)
-	util.array.clear(window)
+	table.insert(mocegui.window,2,win)
+	util.array.clear(mocegui.window)
 	return win
 end
 
@@ -84,9 +84,9 @@ function mocegui.load()
 
 	local debugwin = mocegui.newWindow('debug window',{1,1},{110,56})
 	debugwin.text.new(mocegui.titlecache, {1,14},{0.9,0.9})
-	local debugtxt = debugwin.text.new("\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #window, {1,14},{0.9,0.9})
+	local debugtxt = debugwin.text.new("\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #mocegui.window, {1,14},{0.9,0.9})
 	debugwin.func = function ()
-		debugtxt.text = "\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #window
+		debugtxt.text = "\nCurrent FPS: " .. tostring(love.timer.getFPS()) .. "\nWindow amount:" .. #mocegui.window
 	end
 
 	print(mocegui.titlecache)
@@ -103,16 +103,16 @@ function mocegui.mousemoved( x, y, dx, dy, istouch )
 end
 
 function mocegui.mousereleased(x, y, button)
-	if window[1] then
+	if mocegui.window[1] then
 		if button == 1 then
-			window[1].button = util.array.clear(window[1].button)
-			for index, _button in ipairs(window[1].button) do
-				if _button and _button.position and window[1] and window[1].position then
-					if x >= window[1].position[1] + _button.position[1]  and
-					   x <= window[1].position[1] + _button.position[1] + _button.size[1]  and
-					   y >= window[1].position[2] + _button.position[2]  and
-					   y <= window[1].position[2] + _button.position[2] + _button.size[2]  then
-						_button.func(window)
+			mocegui.window[1].button = util.array.clear(mocegui.window[1].button)
+			for index, _button in ipairs(mocegui.window[1].button) do
+				if _button and _button.position and mocegui.window[1] and mocegui.window[1].position then
+					if x >= mocegui.window[1].position[1] + _button.position[1]  and
+					   x <= mocegui.window[1].position[1] + _button.position[1] + _button.size[1]  and
+					   y >= mocegui.window[1].position[2] + _button.position[2]  and
+					   y <= mocegui.window[1].position[2] + _button.position[2] + _button.size[2]  then
+						_button.func(mocegui.window)
 						_button.pressed = false
 					end
 				end
@@ -125,10 +125,10 @@ function mocegui.mousereleased(x, y, button)
 				mouse.draggin = false
 			end
 		elseif button == 2 then
-			if x >= window[1].position[1]  and
-			x <= window[1].position[1] + window[1].size[1]  and
-			y >= window[1].position[2]  and
-			y <= window[1].position[2] + window[1].size[2]  then
+			if x >= mocegui.window[1].position[1]  and
+			x <= mocegui.window[1].position[1] + mocegui.window[1].size[1]  and
+			y >= mocegui.window[1].position[2]  and
+			y <= mocegui.window[1].position[2] + mocegui.window[1].size[2]  then
 				mocegui.closeWindow()
 			end
 		end
@@ -136,44 +136,44 @@ function mocegui.mousereleased(x, y, button)
 end
 
 function mocegui.mousepressed(x, y, button, istouch)
-	if window[1] then
-		if not (x >= window[1].position[1]  and
-		x <= window[1].position[1] + window[1].size[1]  and
-		y >= window[1].position[2]  and
-		y <= window[1].position[2] + window[1].size[2] ) then
-			for index, win in pairs(window) do
+	if mocegui.window[1] then
+		if not (x >= mocegui.window[1].position[1]  and
+		x <= mocegui.window[1].position[1] + mocegui.window[1].size[1]  and
+		y >= mocegui.window[1].position[2]  and
+		y <= mocegui.window[1].position[2] + mocegui.window[1].size[2] ) then
+			for index, win in pairs(mocegui.window) do
 				if x >= win.position[1]  and
 				x <= win.position[1] + win.size[1]  and
 				y >= win.position[2]  and
 				y <= win.position[2] + win.size[2]  then
-					util.table.move(window,index,1)
+					util.table.move(mocegui.window,index,1)
 					break
 				end
 			end
 		end
 		if button == 1 then
-			if window[1].title and
-			x >= window[1].position[1]  and
-			x <= window[1].position[1] + window[1].size[1]  and
-			y >= window[1].position[2]  and
-			y <= window[1].position[2] + 20 then
-				mouse.draggin = window[1].position
+			if mocegui.window[1].title and
+			x >= mocegui.window[1].position[1]  and
+			x <= mocegui.window[1].position[1] + mocegui.window[1].size[1]  and
+			y >= mocegui.window[1].position[2]  and
+			y <= mocegui.window[1].position[2] + 20 then
+				mouse.draggin = mocegui.window[1].position
 				mouse.current = 2
 			end
-			for index, _button in ipairs(window[1].button) do
-				if x >= window[1].position[1] + _button.position[1]  and
-				x <= window[1].position[1] + _button.position[1] + _button.size[1]  and
-				y >= window[1].position[2] + _button.position[2]  and
-				y <= window[1].position[2] + _button.position[2] + _button.size[2]  then
+			for index, _button in ipairs(mocegui.window[1].button) do
+				if x >= mocegui.window[1].position[1] + _button.position[1]  and
+				x <= mocegui.window[1].position[1] + _button.position[1] + _button.size[1]  and
+				y >= mocegui.window[1].position[2] + _button.position[2]  and
+				y <= mocegui.window[1].position[2] + _button.position[2] + _button.size[2]  then
 					_button.pressed = true
 				end
 			end
 		elseif button == 3 then
-			if x >= window[1].position[1]  and
-			x <= window[1].position[1] + window[1].size[1]  and
-			y >= window[1].position[2]  and
-			y <= window[1].position[2] + window[1].size[2]  then
-				mouse.draggin = window[1].position
+			if x >= mocegui.window[1].position[1]  and
+			x <= mocegui.window[1].position[1] + mocegui.window[1].size[1]  and
+			y >= mocegui.window[1].position[2]  and
+			y <= mocegui.window[1].position[2] + mocegui.window[1].size[2]  then
+				mouse.draggin = mocegui.window[1].position
 				mouse.current = 2
 			end
 		end
@@ -185,10 +185,10 @@ function mocegui.update()
 end
 
 function mocegui.draw()
-	window = util.array.clear(window)
+	util.array.selfclear(mocegui.window)
 	love.graphics.push()
-	for index = #window, 1, -1 do
-		local v = window[index]
+	for index = #mocegui.window, 1, -1 do
+		local v = mocegui.window[index]
 		if v.func then
 			v.func(v.args and unpack(v.args) or 0)
 		end
@@ -218,6 +218,5 @@ function mocegui.draw()
 	love.graphics.pop()
 end
 
-mocegui.window = window
 mocegui.mouse = mouse
 return mocegui
