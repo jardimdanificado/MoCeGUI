@@ -6,10 +6,10 @@ if not rl then
 end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
-local mocegui={version="0.1.8",pending = {},font={rl.LoadFontEx("mocegui/data/font/Cascadia.ttf", 12, nil, 0)}}
+local mocegui={version="0.1.9",pending = {},font={size = 12}}
 local util = require "mocegui.luatils.init"
 mocegui.util = util
-local options = require "mocegui.data.config"
+local config = require "mocegui.data.config"
 local mouse =
 {
 	draggin = false,
@@ -37,8 +37,8 @@ function mocegui.newWindow(title,position,size,color)
 		} or
 		{
 			{
-				position = {x=(size and size.x or 50)-12,y=0},
-				size = {x=12,y=12},
+				position = {x=(size and size.x or 50)-mocegui.font.size,y=0},
+				size = {x=mocegui.font.size,y=mocegui.font.size},
 				color = {r=255,g=127,b=127,a=255},
 				pcolor = {r=127,g=25,b=25,a=255},
 				func = mocegui.closeWindow,
@@ -52,7 +52,7 @@ function mocegui.newWindow(title,position,size,color)
 		local newtxt = function (txt)
 			return {
 				position = {x=position.x or 0,y= position.y or 0},
-				size = size or 12,
+				size = size or mocegui.font.size,
 				color = {r=255 or color.r,g=255 or color.g,b=255 or color.b,a=255 or color.a},
 				text = (txt .. '') or 'blank'
 			}
@@ -62,7 +62,7 @@ function mocegui.newWindow(title,position,size,color)
 			local temp
 			for key, value in ipairs(util.string.split(text,'\n')) do
 				temp = newtxt(value)
-				temp.position.y = temp.position.y + (12*(key-1))
+				temp.position.y = temp.position.y + (mocegui.font.size*(key-1))
 				table.insert(win.text,1,temp)
 				table.insert(result,win.text[1])
 			end
@@ -75,16 +75,17 @@ function mocegui.newWindow(title,position,size,color)
 	win.button.new = function(position,size,func,args,color,pcolor)
 		local btn = {
 			position = position,
-			size = size or {x=12,y=12},
+			size = size or {x=mocegui.font.size,y=mocegui.font.size},
 			color = color or {r=0,g=127,b=127,a=255},
 			pcolor = pcolor or {r=127,g=25,b=26,a=255},
 			func = func or mocegui.closeWindow,
 			args = args or {}
 		}
-		btn.position = position or {x=size.x-12,y=0}
+		btn.position = position or {x=size.x-mocegui.font.size,y=0}
 		table.insert(win.button,1,btn)
 		return win.button[1]
 	end
+	
 	table.insert(mocegui.window,2,win)
 	mocegui.window = util.array.clear(mocegui.window)
 	return win
@@ -95,40 +96,50 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 	rl.DrawRectangle(px, py, sx, sy, color or rl.BLUE)
 end
 
-function mocegui.load()
-	if options.fullscreen then
-        rl.SetConfigFlags(rl.FLAG_FULLSCREEN_MODE)
-    end
-    if options.vsync then
-        rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
-    end
-    if options.runonbackground then
-        rl.SetConfigFlags(rl.FLAG_WINDOW_ALWAYS_RUN)
-    end
-    if options.msaa then
-        rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
-    end
-    if options.interlace then
-        rl.SetConfigFlags(rl.FLAG_INTERLACED_HINT)
-    end 
-    if options.highdpi then
-        rl.SetConfigFlags(rl.FLAG_WINDOW_HIGHDPI)
-    end
-	rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
-    rl.InitWindow(600,400, "MoCeGUI-" .. mocegui.version)
-    rl.SetTargetFPS(0)
-	local iconImageData = rl.LoadImage("mocegui/png/icon.png")
-    rl.SetWindowIcon(iconImageData)
-	mocegui.titlecache = "MoCeGUI-" .. mocegui.version
-
+function mocegui.spawndebug()
 	local debugwin = mocegui.newWindow('debug window',{x=1,y=1},{x=110,y=56})
-	local debugtxt = debugwin.text.new(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(rl.GetFPS()) .. "\nWindow amount:" .. 
-	#mocegui.window, {x=1,y=14},{x=0.9,y=0.9})
+	local debugtxt = debugwin.text.new(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(rl.GetFPS()) .. "\nWindow amount:" .. #mocegui.window, {x=1,y=14},{x=0.9,y=0.9})
 	debugwin.func = function ()
 		debugtxt[3].text = "Window amount:" .. #mocegui.window
 		debugtxt[2].text = "Current FPS: " .. rl.GetFPS()
 	end
-	options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
+end
+
+function mocegui.startup(screen,fontsize)
+	config.screen = screen or config.screen
+	mocegui.font.size = fontsize or mocegui.font.size
+	table.insert(mocegui.font,rl.LoadFontEx("mocegui/data/font/Cascadia.ttf", mocegui.font.size, nil, 0))
+	mocegui.titlecache = "MoCeGUI-" .. mocegui.version
+	config.rendertexture = rl.LoadRenderTexture(config.screen.x, config.screen.y)
+end
+
+function mocegui.load()
+	if config.fullscreen then
+        rl.SetConfigFlags(rl.FLAG_FULLSCREEN_MODE)
+    end
+    if config.vsync then
+        rl.SetConfigFlags(rl.FLAG_VSYNC_HINT)
+    end
+    if config.runonbackground then
+        rl.SetConfigFlags(rl.FLAG_WINDOW_ALWAYS_RUN)
+    end
+    if config.msaa then
+        rl.SetConfigFlags(rl.FLAG_MSAA_4X_HINT)
+    end
+    if config.interlace then
+        rl.SetConfigFlags(rl.FLAG_INTERLACED_HINT)
+    end 
+    if config.highdpi then
+        rl.SetConfigFlags(rl.FLAG_WINDOW_HIGHDPI)
+    end
+	rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
+    rl.InitWindow(config.screen.x,config.screen.y, "MoCeGUI-" .. mocegui.version)
+    rl.SetTargetFPS(0)
+    rl.SetWindowIcon(iconImageData)
+	
+	mocegui.startup()
+	mocegui.spawndebug()
+	local iconImageData = rl.LoadImage("mocegui/png/icon.png")
 end
 
 function mocegui.keypressed(key)
@@ -201,6 +212,9 @@ function mocegui.mousepressed()
 end
 
 function mocegui.mousedown()
+	if not mocegui.window[1] then
+		return
+	end
 	local x,y = rl.GetMouseX(),rl.GetMouseY()
 	local delta = rl.GetMouseDelta()
 	if rl.IsMouseButtonDown(2) then
@@ -216,16 +230,18 @@ function mocegui.mousedown()
 			x >= mocegui.window[1].position.x  and
 			x <= mocegui.window[1].position.x + mocegui.window[1].size.x  and
 			y >= mocegui.window[1].position.y  and
-			y <= mocegui.window[1].position.y + 20 then
+			y <= mocegui.window[1].position.y + mocegui.font.size then
 				mocegui.window[1].position.x = mocegui.window[1].position.x + delta.x
 				mocegui.window[1].position.y = mocegui.window[1].position.y + delta.y
 		end
 	end
 end
 
-function mocegui.maketexture()
+function mocegui.bakeframe()
 	util.array.selfclear(mocegui.window)
+	rl.BeginTextureMode(config.rendertexture)
 	--love.graphics.push()
+	rl.ClearBackground({r=0,g=0,b=0,a=0})
 	for index = #mocegui.window, 1, -1 do
 		local v = mocegui.window[index]
 		if v.func then
@@ -233,11 +249,11 @@ function mocegui.maketexture()
 		end
 		if v.title then
 			rl.DrawRectangle(v.position.x-1, v.position.y-1, v.size.x+2, v.size.y+2, rl.WHITE)
-			rl.DrawRectangle(v.position.x, v.position.y+13, v.size.x, v.size.y-13,v.color)
+			rl.DrawRectangle(v.position.x, v.position.y+(mocegui.font.size+1), v.size.x, v.size.y-(mocegui.font.size+1),v.color)
 			if mocegui.font[1] then
-				rl.DrawTextEx(mocegui.font[1],v.title, {x=v.position.x,y=v.position.y}, 12, 0, v.color)
+				rl.DrawTextEx(mocegui.font[1],v.title, {x=v.position.x,y=v.position.y}, mocegui.font.size, 0, v.color)
 			else
-				rl.DrawText(v.title, v.position.x,v.position.y, 12, v.color)
+				rl.DrawText(v.title, v.position.x,v.position.y, mocegui.font.size, v.color)
 			end
 		else
 			bRect(v.position.x, v.position.y, v.size.x, v.size.y, v.color)
@@ -252,46 +268,50 @@ function mocegui.maketexture()
 		end
 		for key, text in ipairs(v.text) do
 			if mocegui.font[1] then
-				rl.DrawTextEx(mocegui.font[1],text.text, {x=v.position.x+text.position.x, y=v.position.y+text.position.y}, 12, 0, text.color)
+				rl.DrawTextEx(mocegui.font[1],text.text, {x=v.position.x+text.position.x, y=v.position.y+text.position.y}, mocegui.font.size, 0, text.color)
 			else
-				rl.DrawText(text.text, v.position.x+text.position.x, v.position.y+text.position.y, 12, text.color)
+				rl.DrawText(text.text, v.position.x+text.position.x, v.position.y+text.position.y, mocegui.font.size, text.color)
 			end
 		end
 			--world.redraw = false
 			--end
 	end
 	rl.EndTextureMode();
-	return options.rendertexture.texture
+	return config.rendertexture.texture
+end
+
+function mocegui.update()
+	mocegui.util.repeater(mocegui.pending)
+	mocegui.mousepressed()
+    mocegui.mousereleased()
+    mocegui.mousedown()
+	if(rl.IsWindowResized()) then
+        rl.UnloadRenderTexture(config.rendertexture)
+        config.screen.x = rl.GetScreenWidth()
+        config.screen.y = rl.GetScreenHeight()
+        config.rendertexture = rl.LoadRenderTexture(config.screen.x, config.screen.y)
+    end
 end
 
 function mocegui.render()
-	mocegui.util.repeater(mocegui.pending)
-    if(rl.IsWindowResized()) then
-        rl.UnloadRenderTexture(options.rendertexture)
-        options.screen.x = rl.GetScreenWidth()
-        options.screen.y = rl.GetScreenHeight()
-        options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
-        --world.redraw=true
-    end
-    mocegui.mousepressed()
-    mocegui.mousereleased()
-    mocegui.mousedown()
+	
+    
+    mocegui.update()
     rl.BeginDrawing()
-    --if(world.redraw == true and options.freeze == false) then
-	rl.BeginTextureMode(options.rendertexture)
+    --if(world.redraw == true and config.freeze == false) then
 	rl.ClearBackground(rl.BLACK)
-	--rl.BeginMode3D(options.camera)
+	--rl.BeginMode3D(config.camera)
 	--rl.EndMode3D()
-	mocegui.maketexture()
+	mocegui.bakeframe()
     rl.DrawTexturePro(
-        options.rendertexture.texture,
+        config.rendertexture.texture,
         {
             x=0,
             y=0,
-            width=options.screen.x,
-            height=options.screen.y*-1
+            width=config.screen.x,
+            height=config.screen.y*-1
         },
-        {x=0,y=0,width=options.screen.x,height=options.screen.y},
+        {x=0,y=0,width=config.screen.x,height=config.screen.y},
         {x=0,y=0},
         0,
         rl.WHITE
