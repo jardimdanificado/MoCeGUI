@@ -6,7 +6,7 @@ if not rl then
 end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
-local mocegui={version="0.1.8",pending = {},font={}}
+local mocegui={version="0.1.8",pending = {},font={rl.LoadFontEx("mocegui/data/font/Cascadia.ttf", 12, nil, 0)}}
 local util = require "mocegui.luatils.init"
 mocegui.util = util
 local options = require "mocegui.data.config"
