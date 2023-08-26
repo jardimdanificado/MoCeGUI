@@ -61,7 +61,6 @@ function mocegui.newWindow(title,position,size,color)
 			local result = {}
 			local temp
 			for key, value in ipairs(util.string.split(text,'\n')) do
-				print(value)
 				temp = newtxt(value)
 				temp.position.y = temp.position.y + (12*(key-1))
 				table.insert(win.text,1,temp)
@@ -125,7 +124,6 @@ function mocegui.load()
 	local debugwin = mocegui.newWindow('debug window',{x=1,y=1},{x=110,y=56})
 	local debugtxt = debugwin.text.new(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(rl.GetFPS()) .. "\nWindow amount:" .. 
 	#mocegui.window, {x=1,y=14},{x=0.9,y=0.9})
-	print(util.stringify(debugtxt))
 	debugwin.func = function ()
 		debugtxt[3].text = "Window amount:" .. #mocegui.window
 		debugtxt[2].text = "Current FPS: " .. rl.GetFPS()
