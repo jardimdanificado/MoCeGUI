@@ -7,7 +7,7 @@ end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
 local mocegui={version="0.1.9",pending = {},font={size = 12}}
-local util = require "mocegui.luatils.init"
+local util = require "republicanova.luatils.init"
 mocegui.util = util
 local config = require "mocegui.data.config"
 local mouse =
