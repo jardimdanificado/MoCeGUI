@@ -1,13 +1,21 @@
 --Mouse Centered Graphical User Interface(MoCeGUI)
-if not rl then
-    gl = '21'
+local util = require "republicanova.luatils.init"
+if not rl and not love then
+    for i, v in ipairs(arg or {}) do
+        if util.string.includes(v,'-gl') then
+            gl = util.string.replace(v,'-gl','')
+            print(gl)
+        end
+    end
+    if not gl then
+        gl = '21'
+    end
     rl = require('mocegui.lib.raylib')
     gl = nil
 end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
 local mocegui={version="0.1.9",pending = {},font={size = 12}}
-local util = require "republicanova.luatils.init"
 mocegui.util = util
 local config = require "mocegui.data.config"
 local mouse =
