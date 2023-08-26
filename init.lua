@@ -6,10 +6,10 @@ if not rl then
 end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
-local mocegui={version="0.1.7",pending = {},font={}}
+local mocegui={version="0.1.8",pending = {},font={}}
 local util = require "mocegui.luatils.init"
 mocegui.util = util
-local options = require "data.config"
+local options = require "mocegui.data.config"
 local mouse =
 {
 	draggin = false,
@@ -223,24 +223,7 @@ function mocegui.mousedown()
 	end
 end
 
-function mocegui.render()
-	mocegui.util.repeater(mocegui.pending)
-    if(rl.IsWindowResized()) then
-        rl.UnloadRenderTexture(options.rendertexture)
-        options.screen.x = rl.GetScreenWidth()
-        options.screen.y = rl.GetScreenHeight()
-        options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
-        --world.redraw=true
-    end
-    mocegui.mousepressed()
-    mocegui.mousereleased()
-    mocegui.mousedown()
-    rl.BeginDrawing()
-    --if(world.redraw == true and options.freeze == false) then
-	rl.BeginTextureMode(options.rendertexture)
-	rl.ClearBackground(rl.BLACK)
-	--rl.BeginMode3D(options.camera)
-	--rl.EndMode3D()
+function mocegui.maketexture()
 	util.array.selfclear(mocegui.window)
 	--love.graphics.push()
 	for index = #mocegui.window, 1, -1 do
@@ -278,6 +261,28 @@ function mocegui.render()
 			--end
 	end
 	rl.EndTextureMode();
+	return options.rendertexture.texture
+end
+
+function mocegui.render()
+	mocegui.util.repeater(mocegui.pending)
+    if(rl.IsWindowResized()) then
+        rl.UnloadRenderTexture(options.rendertexture)
+        options.screen.x = rl.GetScreenWidth()
+        options.screen.y = rl.GetScreenHeight()
+        options.rendertexture = rl.LoadRenderTexture(options.screen.x, options.screen.y)
+        --world.redraw=true
+    end
+    mocegui.mousepressed()
+    mocegui.mousereleased()
+    mocegui.mousedown()
+    rl.BeginDrawing()
+    --if(world.redraw == true and options.freeze == false) then
+	rl.BeginTextureMode(options.rendertexture)
+	rl.ClearBackground(rl.BLACK)
+	--rl.BeginMode3D(options.camera)
+	--rl.EndMode3D()
+	mocegui.maketexture()
     rl.DrawTexturePro(
         options.rendertexture.texture,
         {
