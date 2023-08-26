@@ -12,9 +12,7 @@ mocegui.util = util
 local config = require "mocegui.data.config"
 local mouse =
 {
-	draggin = false,
-	lastposition = {x=0,y=0},
-	moved = {x=0,y=0},
+	draggin = false
 }
 
 mocegui.window = {}
@@ -148,7 +146,16 @@ end
 function mocegui.mousereleased()
 	local x,y = rl.GetMouseX(),rl.GetMouseY()
 	if mocegui.window[1] then
-		if rl.IsMouseButtonPressed(0) then
+		if rl.IsMouseButtonReleased(0) then
+			if mocegui.window[1].title and
+			x >= mocegui.window[1].position.x  and
+			x <= mocegui.window[1].position.x + mocegui.window[1].size.x  and
+			y >= mocegui.window[1].position.y  and
+			y <= mocegui.window[1].position.y + mocegui.font.size then
+				if mouse.draggin then
+					mouse.draggin = false
+				end
+			end
 			mocegui.window[1].button = util.array.clear(mocegui.window[1].button)
 			for index, _button in ipairs(mocegui.window[1].button) do
 				if _button and _button.position and mocegui.window[1] and mocegui.window[1].position then
@@ -164,11 +171,11 @@ function mocegui.mousereleased()
 			if mouse.draggin then
 				mouse.draggin = false
 			end
-		elseif rl.IsMouseButtonPressed(2) then
+		elseif rl.IsMouseButtonReleased(2) then
 			if mouse.draggin then
 				mouse.draggin = false
 			end
-		elseif rl.IsMouseButtonPressed(1) then
+		elseif rl.IsMouseButtonReleased(1) then
 			if x >= mocegui.window[1].position.x  and
 			x <= mocegui.window[1].position.x + mocegui.window[1].size.x  and
 			y >= mocegui.window[1].position.y  and
@@ -192,6 +199,9 @@ function mocegui.mousepressed()
 					x <= win.position.x + win.size.x  and
 					y >= win.position.y  and
 					y <= win.position.y + win.size.y  then
+						if mouse.draggin then
+							mouse.draggin = false
+						end
 						util.table.move(mocegui.window,index,1)
 						break
 					end
@@ -199,6 +209,13 @@ function mocegui.mousepressed()
 			end
 		end
 		if rl.IsMouseButtonPressed(0) then
+			if mocegui.window[1].title and
+			x >= mocegui.window[1].position.x  and
+			x <= mocegui.window[1].position.x + mocegui.window[1].size.x  and
+			y >= mocegui.window[1].position.y  and
+			y <= mocegui.window[1].position.y + mocegui.font.size then
+				mouse.draggin = mocegui.window[1].position
+			end
 			for index, _button in ipairs(mocegui.window[1].button) do
 				if x >= mocegui.window[1].position.x + _button.position.x  and
 				x <= mocegui.window[1].position.x + _button.position.x + _button.size.x  and
@@ -207,6 +224,8 @@ function mocegui.mousepressed()
 					_button.pressed = true
 				end
 			end
+		elseif rl.IsMouseButtonPressed(2) then
+			mouse.draggin = mocegui.window[1].position
 		end
 	end
 end
@@ -218,21 +237,14 @@ function mocegui.mousedown()
 	local x,y = rl.GetMouseX(),rl.GetMouseY()
 	local delta = rl.GetMouseDelta()
 	if rl.IsMouseButtonDown(2) then
-		if x >= mocegui.window[1].position.x  and
-		x <= mocegui.window[1].position.x + mocegui.window[1].size.x  and
-		y >= mocegui.window[1].position.y  and
-		y <= mocegui.window[1].position.y + mocegui.window[1].size.y  then
-			mocegui.window[1].position.x = mocegui.window[1].position.x + delta.x
-			mocegui.window[1].position.y = mocegui.window[1].position.y + delta.y
+		if mouse.draggin then
+			mouse.draggin.x = mouse.draggin.x + delta.x
+			mouse.draggin.y = mouse.draggin.y + delta.y
 		end
 	elseif rl.IsMouseButtonDown(0) then
-		if mocegui.window[1].title and
-			x >= mocegui.window[1].position.x  and
-			x <= mocegui.window[1].position.x + mocegui.window[1].size.x  and
-			y >= mocegui.window[1].position.y  and
-			y <= mocegui.window[1].position.y + mocegui.font.size then
-				mocegui.window[1].position.x = mocegui.window[1].position.x + delta.x
-				mocegui.window[1].position.y = mocegui.window[1].position.y + delta.y
+		if mouse.draggin then
+			mouse.draggin.x = mouse.draggin.x + delta.x
+			mouse.draggin.y = mouse.draggin.y + delta.y
 		end
 	end
 end
