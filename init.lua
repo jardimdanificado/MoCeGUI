@@ -15,7 +15,7 @@ if not rl and not love then
 end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
-local mocegui={version="0.1.9",pending = {},font={size = 12}}
+local mocegui={version="0.1.92",pending = {},font={size = 12}}
 mocegui.util = util
 local config = require "mocegui.data.config"
 local mouse =
@@ -103,12 +103,13 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 end
 
 function mocegui.spawndebug()
-	local debugwin = mocegui.newWindow('debug window',{x=1,y=1},{x=110,y=56})
-	local debugtxt = debugwin.text.new(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(rl.GetFPS()) .. "\nWindow amount:" .. #mocegui.window, {x=1,y=14},{x=0.9,y=0.9})
+	local debugwin = mocegui.newWindow('debug window',{x=1,y=1},{x=(mocegui.font.size+2)*10,y=(mocegui.font.size+2)*4})
+	local debugtxt = debugwin.text.new(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(rl.GetFPS()) .. "\nWindow amount:" .. #mocegui.window, {x=1,y=mocegui.font.size+2},{x=0.9,y=0.9})
 	debugwin.func = function ()
 		debugtxt[3].text = "Window amount:" .. #mocegui.window
 		debugtxt[2].text = "Current FPS: " .. rl.GetFPS()
 	end
+	return debugwin
 end
 
 function mocegui.startup(screen,fontsize)
@@ -233,7 +234,12 @@ function mocegui.mousepressed()
 				end
 			end
 		elseif rl.IsMouseButtonPressed(2) then
-			mouse.draggin = mocegui.window[1].position
+			if x >= mocegui.window[1].position.x  and
+			x <= mocegui.window[1].position.x + mocegui.window[1].size.x  and
+			y >= mocegui.window[1].position.y  and
+			y <= mocegui.window[1].position.y + mocegui.window[1].size.y then
+				mouse.draggin = mocegui.window[1].position
+			end
 		end
 	end
 end
