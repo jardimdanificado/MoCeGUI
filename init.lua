@@ -15,7 +15,7 @@ if not rl and not love then
 end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
-local mocegui={version="0.1.93",pending = {},font={size = 12}}
+local mocegui={version="0.1.94",pending = {},font={size = 12}}
 mocegui.util = util
 local config = require "mocegui.data.config"
 local mouse =
@@ -30,28 +30,34 @@ function mocegui.closeWindow()
 	mocegui.window = util.array.clear(mocegui.window)
 end
 
-function mocegui.newText(win,text,position,size,color,pcolor)
+function mocegui.newText(win,text,size,color,pcolor)
 	local newtxt = function (txt)
 		return {
-			position = {x=position.x or 0,y= position.y or 0},
+			position = {x=4,y=4},
 			size = size or mocegui.font.size,
 			color = {r=255 or color.r,g=255 or color.g,b=255 or color.b,a=255 or color.a},
 			text = (txt .. '') or 'blank'
 		}
 	end
+	local insert = function(win,txt)
+		table.insert(win.text,1,newtxt(txt))
+		win.text[1].position.y = win.text[1].position.y + (mocegui.font.size*(#win.text+(not win.title and -1 or 0)))
+		win.size.y = (mocegui.font.size*(#win.text+(not win.title and 0 or 1))) + 8
+		if (((#txt/2.5)*(mocegui.font.size+2))-2) > win.size.x then
+			win.size.x = (((#txt/2.5)*(mocegui.font.size+2))-2)
+		end
+		win.size.y = (mocegui.font.size*(#win.text+(not win.title and 0 or 1))) + 8
+		return win.text[1]
+	end
 	if util.string.includes(text,'\n') then
 		local result = {}
 		local temp
 		for key, value in ipairs(util.string.split(text,'\n')) do
-			temp = newtxt(value)
-			temp.position.y = temp.position.y + (mocegui.font.size*(key-1))
-			table.insert(win.text,1,temp)
-			table.insert(result,win.text[1])
+			table.insert(result,1,insert(win,value))
 		end
 		return result
 	else
-		table.insert(win.text,1,newtxt(text))
-		return win.text[1]
+		return insert(win,text)
 	end
 end
 
@@ -67,6 +73,27 @@ function mocegui.newButton(win,position,size,func,args,color,pcolor)
 	btn.position = position or {x=size.x-mocegui.font.size,y=0}
 	table.insert(win.button,1,btn)
 	return win.button[1]
+end
+
+function mocegui.newSwitch(win,text,object,name,_func,_args)
+    local txt = win.text.new(text)
+    local button = win.button.new(
+        {
+            x=win.size.x-mocegui.font.size,
+            y=4+(mocegui.font.size*#win.button+1)+(mocegui.font.size*3)
+        },
+        {
+            x=mocegui.font.size-4,
+            y=mocegui.font.size-4
+        }
+    )
+    button.func = function(_func)
+        button.color = (object[name]) and rl.RED or rl.GREEN
+        object[name] = (object[name] == false) and true or false
+    end
+	button.color = (not object[name]) and rl.RED or rl.GREEN
+    button.args = {_func}
+	return txt, button
 end
 
 function mocegui.newWindow(title,position,size,color)
@@ -93,11 +120,15 @@ function mocegui.newWindow(title,position,size,color)
 		hide = false,
 		title = title
 	}
-	win.text.new = function(text,position,size,color,pcolor)
-		return mocegui.newText(win,text,position,size,color,pcolor)
+	win.text.new = function(text,size,color,pcolor)
+		return mocegui.newText(win,text,size,color,pcolor)
 	end
 	win.button.new = function(position,size,func,args,color,pcolor)
 		return mocegui.newButton(win,position,size,func,args,color,pcolor)
+	end
+	win.switch = {}
+	win.switch.new = function(text,object,name,_func,_args)
+		return mocegui.newSwitch(win,text,object,name,_func,_args)
 	end
 	
 	table.insert(mocegui.window,2,win)
@@ -114,9 +145,9 @@ function mocegui.newTextWindow(title,text,position)
 			len = #value
 		end
 	end
-	win.size.x = (((len/2.5)*(mocegui.font.size+2))-2)
-	win.size.y = ((#txt)*(mocegui.font.size)+4)
-	win.text.new(text,{x=4,y=4},mocegui.font.size)
+	--win.size.x = (((len/2.5)*(mocegui.font.size+2))-2)
+	--win.size.y = ((#txt)*(mocegui.font.size)+4)
+	win.text.new(text,mocegui.font.size)
 	return win
 end
 
@@ -141,10 +172,10 @@ end
 
 function mocegui.spawndebug()
 	local debugwin = mocegui.newWindow('debug window',{x=1,y=1},{x=(mocegui.font.size+2)*10,y=(mocegui.font.size+2)*4})
-	local debugtxt = debugwin.text.new(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(rl.GetFPS()) .. "\nWindow amount:" .. #mocegui.window, {x=1,y=mocegui.font.size+2},{x=0.9,y=0.9})
+	local debugtxt = debugwin.text.new(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(rl.GetFPS()) .. "\nWindow amount:" .. #mocegui.window)
 	debugwin.func = function ()
-		debugtxt[3].text = "Window amount:" .. #mocegui.window
-		debugtxt[2].text = "Current FPS: " .. rl.GetFPS()
+		debugtxt[#debugtxt-1].text = "Window amount:" .. #mocegui.window
+		debugtxt[#debugtxt-2].text = "Current FPS: " .. rl.GetFPS()
 	end
 	return debugwin
 end
@@ -344,11 +375,15 @@ function mocegui.bakeframe()
 	return config.rendertexture.texture
 end
 
-function mocegui.update()
-	mocegui.util.repeater(mocegui.pending)
+function mocegui.updateMouse()
 	mocegui.mousepressed()
     mocegui.mousereleased()
     mocegui.mousedown()
+end
+
+function mocegui.update()
+	mocegui.util.repeater(mocegui.pending)
+	mocegui.updateMouse()
 	if(rl.IsWindowResized()) then
         rl.UnloadRenderTexture(config.rendertexture)
         config.screen.x = rl.GetScreenWidth()
@@ -358,8 +393,6 @@ function mocegui.update()
 end
 
 function mocegui.render()
-	
-    
     mocegui.update()
     rl.BeginDrawing()
     --if(world.redraw == true and config.freeze == false) then
