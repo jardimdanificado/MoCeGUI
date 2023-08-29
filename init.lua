@@ -15,7 +15,7 @@ if not rl and not love then
 end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
-local mocegui={version="0.1.92",pending = {},font={size = 12}}
+local mocegui={version="0.1.93",pending = {},font={size = 12}}
 mocegui.util = util
 local config = require "mocegui.data.config"
 local mouse =
@@ -28,6 +28,45 @@ mocegui.window = {}
 function mocegui.closeWindow()
 	mocegui.window[1] = nil
 	mocegui.window = util.array.clear(mocegui.window)
+end
+
+function mocegui.newText(win,text,position,size,color,pcolor)
+	local newtxt = function (txt)
+		return {
+			position = {x=position.x or 0,y= position.y or 0},
+			size = size or mocegui.font.size,
+			color = {r=255 or color.r,g=255 or color.g,b=255 or color.b,a=255 or color.a},
+			text = (txt .. '') or 'blank'
+		}
+	end
+	if util.string.includes(text,'\n') then
+		local result = {}
+		local temp
+		for key, value in ipairs(util.string.split(text,'\n')) do
+			temp = newtxt(value)
+			temp.position.y = temp.position.y + (mocegui.font.size*(key-1))
+			table.insert(win.text,1,temp)
+			table.insert(result,win.text[1])
+		end
+		return result
+	else
+		table.insert(win.text,1,newtxt(text))
+		return win.text[1]
+	end
+end
+
+function mocegui.newButton(win,position,size,func,args,color,pcolor)
+	local btn = {
+		position = position,
+		size = size or {x=mocegui.font.size,y=mocegui.font.size},
+		color = color or {r=0,g=127,b=127,a=255},
+		pcolor = pcolor or {r=127,g=25,b=26,a=255},
+		func = func or mocegui.closeWindow,
+		args = args or {}
+	}
+	btn.position = position or {x=size.x-mocegui.font.size,y=0}
+	table.insert(win.button,1,btn)
+	return win.button[1]
 end
 
 function mocegui.newWindow(title,position,size,color)
@@ -55,46 +94,44 @@ function mocegui.newWindow(title,position,size,color)
 		title = title
 	}
 	win.text.new = function(text,position,size,color,pcolor)
-		local newtxt = function (txt)
-			return {
-				position = {x=position.x or 0,y= position.y or 0},
-				size = size or mocegui.font.size,
-				color = {r=255 or color.r,g=255 or color.g,b=255 or color.b,a=255 or color.a},
-				text = (txt .. '') or 'blank'
-			}
-		end
-		if util.string.includes(text,'\n') then
-			local result = {}
-			local temp
-			for key, value in ipairs(util.string.split(text,'\n')) do
-				temp = newtxt(value)
-				temp.position.y = temp.position.y + (mocegui.font.size*(key-1))
-				table.insert(win.text,1,temp)
-				table.insert(result,win.text[1])
-			end
-			return result
-		else
-			table.insert(win.text,1,newtxt(text))
-			return win.text[1]
-		end
+		return mocegui.newText(win,text,position,size,color,pcolor)
 	end
 	win.button.new = function(position,size,func,args,color,pcolor)
-		local btn = {
-			position = position,
-			size = size or {x=mocegui.font.size,y=mocegui.font.size},
-			color = color or {r=0,g=127,b=127,a=255},
-			pcolor = pcolor or {r=127,g=25,b=26,a=255},
-			func = func or mocegui.closeWindow,
-			args = args or {}
-		}
-		btn.position = position or {x=size.x-mocegui.font.size,y=0}
-		table.insert(win.button,1,btn)
-		return win.button[1]
+		return mocegui.newButton(win,position,size,func,args,color,pcolor)
 	end
 	
 	table.insert(mocegui.window,2,win)
 	mocegui.window = util.array.clear(mocegui.window)
 	return win
+end
+
+function mocegui.newTextWindow(title,text,position)
+	local win = mocegui.newWindow(title,position)
+	local txt = util.string.split(text,'\n')
+	local len = #txt[1]
+	for key, value in ipairs(txt) do
+		if #value > len then
+			len = #value
+		end
+	end
+	win.size.x = (((len/2.5)*(mocegui.font.size+2))-2)
+	win.size.y = ((#txt)*(mocegui.font.size)+4)
+	win.text.new(text,{x=4,y=4},mocegui.font.size)
+	return win
+end
+
+mocegui.timeout = function(win,seconds)
+	util.agendar(mocegui.pending, function()
+        for i,v in ipairs(mocegui.window) do
+            if v == win then
+                mocegui.window = util.array.clear(mocegui.window)
+                util.table.move(mocegui.window,i,#mocegui.window)
+                mocegui.window[#mocegui.window] = nil
+                mocegui.window = util.array.clear(mocegui.window)
+                break
+            end
+        end
+    end,{0},seconds)
 end
 
 local function bRect(px,py,sx,sy,color,bordercolor)
@@ -113,6 +150,8 @@ function mocegui.spawndebug()
 end
 
 function mocegui.startup(screen,fontsize)
+	local iconImageData = rl.LoadImage("mocegui/png/icon.png")
+    rl.SetWindowIcon(iconImageData)
 	config.screen = screen or config.screen
 	mocegui.font.size = fontsize or mocegui.font.size
 	table.insert(mocegui.font,rl.LoadFontEx("mocegui/data/font/Cascadia.ttf", mocegui.font.size, nil, 0))
@@ -142,11 +181,10 @@ function mocegui.load()
 	rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
     rl.InitWindow(config.screen.x,config.screen.y, "MoCeGUI-" .. mocegui.version)
     rl.SetTargetFPS(0)
-    rl.SetWindowIcon(iconImageData)
+	
 	
 	mocegui.startup()
 	mocegui.spawndebug()
-	local iconImageData = rl.LoadImage("mocegui/png/icon.png")
 end
 
 function mocegui.keypressed(key)
