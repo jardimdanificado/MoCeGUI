@@ -15,7 +15,7 @@ if not rl and not love then
 end
 
 package.path = 'mocegui/luatils/?.lua' .. ";" .. package.path
-local mocegui={version="0.1.94",pending = {},font={size = 12}}
+local mocegui={version="0.1.95",pending = {},font={size = 12}}
 mocegui.util = util
 local config = require "mocegui.data.config"
 local mouse =
@@ -61,7 +61,7 @@ function mocegui.newText(win,text,size,color,pcolor)
 	end
 end
 
-function mocegui.newButton(win,position,size,func,args,color,pcolor)
+function mocegui.newFreeButton(win,position,size,func,args,color,pcolor)
 	local btn = {
 		position = position,
 		size = size or {x=mocegui.font.size,y=mocegui.font.size},
@@ -75,24 +75,74 @@ function mocegui.newButton(win,position,size,func,args,color,pcolor)
 	return win.button[1]
 end
 
-function mocegui.newSwitch(win,text,object,name,_func,_args)
-    local txt = win.text.new(text)
-    local button = win.button.new(
-        {
-            x=win.size.x-mocegui.font.size,
-            y=4+(mocegui.font.size*#win.button+1)+(mocegui.font.size*3)
+function mocegui.newListButton(win,func,args,text,color,pcolor)
+	if text then
+		win.text.new(text)
+	end
+	local btn = {
+		position = {x=0,y=0},
+		size = {
+            x=mocegui.font.size-4,
+            y=mocegui.font.size-4
         },
+		color = color or {r=0,g=127,b=127,a=255},
+		pcolor = pcolor or {r=127,g=25,b=26,a=255},
+		func = func or mocegui.closeWindow,
+		args = args or {}
+	}
+	btn.position = {x = win.size.x/2 - btn.size.x/2, y = (mocegui.font.size/3) + (mocegui.font.size*(#win.text+(not win.title and -1 or 0)))}
+	if text then
+		btn.position.x = win.size.x-mocegui.font.size
+	end
+	table.insert(win.button,1,btn)
+	return win.button[1]
+end
+
+function mocegui.newButton(win,func,args,text,color,pcolor)
+	if text then
+		local txt = win.text.new(text)
+		txt.color = pcolor or txt.color
+		txt.position.x = (win.size.x/2)-((((#txt.text/2.5)*(mocegui.font.size+2))-2)/2)+2
+		txt.position.y = txt.position.y - 1
+	end
+	local btn = {
+		position = {x=0,y=0},
+		size = {
+            x=mocegui.font.size-4,
+            y=mocegui.font.size-4
+        },
+		color = color or {r=0,g=127,b=127,a=255},
+		pcolor = pcolor or {r=127,g=25,b=26,a=255},
+		func = func or mocegui.closeWindow,
+		args = args or {}
+	}
+	btn.position = {x = win.size.x/2 - btn.size.x/2, y = (mocegui.font.size/3) + (mocegui.font.size*(#win.text+(not win.title and -1 or 0)))}
+	if text then
+		btn.size.x = (((#text/2.5)*(mocegui.font.size+2)))
+		btn.position.x = btn.position.x - (btn.size.x/2) + 8
+	end
+	table.insert(win.button,1,btn)
+	return win.button[1]
+end
+
+function mocegui.newSwitch(win,text,object,name)
+    local txt = win.text.new(text)
+    local button = mocegui.newFreeButton(win,
         {
+            x = win.size.x-mocegui.font.size,
+            y = (mocegui.font.size/3) + (mocegui.font.size*(#win.text+(not win.title and -1 or 0)))
+        },
+		{
             x=mocegui.font.size-4,
             y=mocegui.font.size-4
         }
     )
-    button.func = function(_func)
+    button.func = function()
         button.color = (object[name]) and rl.RED or rl.GREEN
         object[name] = (object[name] == false) and true or false
     end
 	button.color = (not object[name]) and rl.RED or rl.GREEN
-    button.args = {_func}
+    button.args = {}
 	return txt, button
 end
 
@@ -123,12 +173,12 @@ function mocegui.newWindow(title,position,size,color)
 	win.text.new = function(text,size,color,pcolor)
 		return mocegui.newText(win,text,size,color,pcolor)
 	end
-	win.button.new = function(position,size,func,args,color,pcolor)
-		return mocegui.newButton(win,position,size,func,args,color,pcolor)
+	win.button.new = function(func,args,text,color,pcolor)
+		return mocegui.newListButton(win,func,args,text,color,pcolor)
 	end
 	win.switch = {}
-	win.switch.new = function(text,object,name,_func,_args)
-		return mocegui.newSwitch(win,text,object,name,_func,_args)
+	win.switch.new = function(text,object,name)
+		return mocegui.newSwitch(win,text,object,name)
 	end
 	
 	table.insert(mocegui.window,2,win)
@@ -170,8 +220,8 @@ local function bRect(px,py,sx,sy,color,bordercolor)
 	rl.DrawRectangle(px, py, sx, sy, color or rl.BLUE)
 end
 
-function mocegui.spawndebug()
-	local debugwin = mocegui.newWindow('debug window',{x=1,y=1},{x=(mocegui.font.size+2)*10,y=(mocegui.font.size+2)*4})
+function mocegui.spawndebug(customposition)
+	local debugwin = mocegui.newWindow('debug window',customposition or {x=1,y=1},{x=(mocegui.font.size+2)*10,y=(mocegui.font.size+2)*4})
 	local debugtxt = debugwin.text.new(mocegui.titlecache .. "\nCurrent FPS: " .. tostring(rl.GetFPS()) .. "\nWindow amount:" .. #mocegui.window)
 	debugwin.func = function ()
 		debugtxt[#debugtxt-1].text = "Window amount:" .. #mocegui.window
@@ -212,7 +262,6 @@ function mocegui.load()
 	rl.SetConfigFlags(rl.FLAG_WINDOW_RESIZABLE)
     rl.InitWindow(config.screen.x,config.screen.y, "MoCeGUI-" .. mocegui.version)
     rl.SetTargetFPS(0)
-	
 	
 	mocegui.startup()
 	mocegui.spawndebug()
